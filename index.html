@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="ARLI enables RL finetuning of generalist robot policies under inference latency via asynchronous RL with intermediate information.">
+  <meta name="keywords" content="ARLI, asynchronous RL, inference latency, VLA, DSRL, real-time control, robot learning">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning to Act While Waiting: RL Finetuning Under Inference Latency</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<nav id="toc-nav" aria-label="Section navigation">
+  <a class="toc-item" href="#arli"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">ARLI</span></a>
+  <a class="toc-item" href="#simulation"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">Simulation</span></a>
+  <a class="toc-item" href="#real-world"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">Real-World</span></a>
+  <a class="toc-item" href="#ablations"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">Ablations</span></a>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+
+          <h2 class="subtitle is-3 publication-subtitle">Learning to Act While Waiting</h2>
+          <h1 class="title is-1 publication-title">RL Finetuning of Generalist Robot Policies Under Inference Latency</h1>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Anonymous Author(s)</span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block publication-venue">Submitted to CoRL 2026</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="./static/paper.pdf" target="_blank" rel="noopener" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            While reinforcement learning (RL) allows generalist robot policies to continually improve during deployment, the large model size of modern generalist policies, such as VLAs, poses a fundamental obstacle to effective RL improvement. In particular, their severe inference latency&mdash;which can lead to pauses or jerky movements&mdash;can alter the effective environment dynamics and, if not correctly accounted for, break the Markov assumption that RL relies on, causing standard RL algorithms to fail completely. In this work, we introduce a latency-aware framework, <strong>Asynchronous RL with Intermediate Information (<span class="arli">ARLI</span>)</strong>, that enables RL-based improvement of generalist policies under inference delays. Our framework builds on asynchronous inference approaches, which interleave action generation with execution to hide latency, and addresses its incompatibility with RL by providing a low-latency RL policy design that maximizes reactivity within the inference window through two contributions: state augmentations that restore near-Markovian structure by incorporating committed actions and a mid-inference observation. We evaluate our approach across simulated and real-world manipulation tasks, and find that it enables effective finetuning under inference delays where standard RL fails entirely, even matching or exceeding the performance of standard RL in idealized no-latency settings.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section is-light">
+  <div class="container is-max-desktop content has-text-justified">
+    <h2 class="title is-3 has-text-centered" id="arli">Asynchronous RL with Intermediate Information (<span class="arli">ARLI</span>)</h2>
+
+    <img class="teaser-figure figure-full"
+         src="./static/images/figures/Teaser.png"
+         data-placeholder="Figure 1: Teaser (Teaser.png)"
+         alt="Enabling RL improvement of generalist robot policies under inference latency.">
+    <p class="figure-caption has-text-centered">
+      <strong>Figure 1:</strong> Enabling RL improvement of generalist robot policies under inference latency.
+      Generalist policies incur significant action inference latency delays, either forcing pauses during inference or relying on stale observations, making RL improvement brittle.
+      <span class="arli">ARLI</span> uses intermediate actions and updated asynchronous observations to steer the next action chunk, enabling effective real-world improvement under asynchronous inference.
+    </p>
+
+    <p>
+      Large vision-language-action models (VLAs) can require 100&ndash;300+ ms to generate actions on consumer GPUs.
+      Such delays can cause pauses or jerky motions that alter the effective environment dynamics and degrade performance, especially in settings that require high reactivity.
+      Although asynchronous inference strategies compute the next action while the current action is being executed to mitigate these effects, they introduce a key challenge for RL:
+      since inference begins before the current action finishes executing, the policy cannot condition on the actual state where the action will be played.
+      Naively combining RL with asynchronous inference produces a non-Markovian effective state, causing standard RL methods to fail.
+    </p>
+
+    <p>
+      <span class="arli">ARLI</span> overcomes this non-Markovian state with careful state augmentation and a low-latency RL policy design.
+      We build on Diffusion Steering via Reinforcement Learning (DSRL), which trains a lightweight RL policy to select the input noise that steers a generalist flow or diffusion policy toward desired behaviors.
+      Under asynchronous inference, naive DSRL conditioning on only the delayed initial state is insufficient for effective finetuning.
+    </p>
+
+    <img class="figure-full"
+         src="./static/images/figures/Overview.png"
+         data-placeholder="Figure 2: ARLI overview (Overview.png)"
+         alt="An overview of the ARLI approach under inference delays.">
+    <p class="figure-caption has-text-centered">
+      <strong>Figure 2:</strong> An overview of <span class="arli">ARLI</span>.
+      Inference begins <em>t</em><sub>delay</sub> steps before the next action chunk is required.
+      At step <em>t</em> &minus; <em>t</em><sub>rl</sub><sup>delay</sup>, the RL policy must run so the action expert receives a noise input once VLM inference finishes.
+      The RL policy is conditioned on the initial state, intermediate actions, and an intermediate observation.
+    </p>
+
+    <p>Our two core contributions restore near-Markovian structure within the inference window:</p>
+    <ul>
+      <li><strong>Intermediate actions:</strong> Include committed actions executed since inference began, giving the RL policy information about how the environment evolves before the next chunk plays.</li>
+      <li><strong>Intermediate observation:</strong> Condition on a more recent state at <em>t</em> &minus; <em>t</em><sub>rl</sub><sup>delay</sup>, after the VLM backbone finishes but before the action expert completes denoising, maximizing reactivity without adding inference delay.</li>
+    </ul>
+
+    <div class="columns is-vcentered">
+      <div class="column is-half">
+        <img class="figure-full"
+             src="./static/images/figures/IntermediateState.png"
+             data-placeholder="Figure 3: Intermediate state (IntermediateState.png)"
+             alt="The benefit of intermediate state conditioning under disturbances.">
+      </div>
+      <div class="column is-half">
+        <p class="figure-caption">
+          <strong>Figure 3:</strong> The benefit of intermediate state conditioning.
+          In naive asynchronous inference, the initial state does not capture stochastic events (e.g., moving obstacles).
+          By conditioning on an intermediate state, the policy can react to disturbances that occur after inference begins.
+        </p>
+      </div>
+    </div>
+
+    <p>
+      We further show that when environments exhibit open-loop consistency, delayed state information does not incur significant suboptimality,
+      providing theoretical support for <span class="arli">ARLI</span>&rsquo;s state augmentations.
+      Real-Time Chunking (RTC) can also be combined with <span class="arli">ARLI</span> to improve temporal consistency during finetuning.
+    </p>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop content has-text-justified">
+    <h2 class="title is-3 has-text-centered" id="simulation">Simulated Experiments</h2>
+
+    <p>
+      We evaluate <span class="arli">ARLI</span> on high-reactivity simulated tasks, including Kinetix environments
+      (<em>mjc swimmer</em>, <em>mjc walker</em>, <em>car launch</em>) and AlohaTransferCube, comparing against naive asynchronous DSRL and DSRL with RTC.
+    </p>
+
+    <img class="figure-full"
+         src="./static/images/figures/SimResults.png"
+         data-placeholder="Figure 4: Simulation results (SimResults.png)"
+         alt="Comparison of ARLI and DSRL on simulation tasks with and without RTC.">
+    <p class="figure-caption has-text-centered">
+      <strong>Figure 4:</strong> Comparison of <span class="arli">ARLI</span> and DSRL on simulation tasks with and without RTC.
+    </p>
+
+    <p>
+      <span class="arli">ARLI</span> significantly outperforms naive DSRL under asynchronous inference, converging to higher final success rates with less training time.
+      While DSRL with RTC improves finetuning on some tasks, it is insufficient on its own; the state augmentations in <span class="arli">ARLI</span> are required for reliable improvement.
+      In many cases <span class="arli">ARLI</span> performs effectively without RTC, though RTC further improves efficiency and reliability.
+    </p>
+  </div>
+</section>
+
+
+<section class="section is-light">
+  <div class="container is-max-desktop content has-text-justified">
+    <h2 class="title is-3 has-text-centered" id="real-world">Real-World Experiments</h2>
+
+    <p>
+      We test whether <span class="arli">ARLI</span> enables effective RL finetuning on a bimanual UR5e robot cell with wrist and base cameras.
+      All experiments initialize from &pi;<sub>0.5</sub> finetuned on small human demonstration datasets at 60 Hz with action chunk length 50.
+    </p>
+
+    <img class="figure-full"
+         src="./static/images/figures/RealWorldResults.png"
+         data-placeholder="Figure 5: Real-world results (RealWorldResults.png)"
+         alt="Comparison of ARLI against other RL finetuning methods on real-world tasks.">
+    <p class="figure-caption has-text-centered">
+      <strong>Figure 5:</strong> Comparison of <span class="arli">ARLI</span> against other RL finetuning methods on real-world tasks.
+      Left: task images. Middle: training success curves. Right: estimated throughput in successes/hour.
+    </p>
+
+    <p>We consider three real-world manipulation tasks:</p>
+    <ul>
+      <li><strong>Assembly:</strong> Insert a power connector into an inverter box by aligning it with two pins.</li>
+      <li><strong>Shoe-in-Bag:</strong> Pick up a shoe and place it into a narrow bag.</li>
+      <li><strong>Bag-Placement:</strong> With both arms, pick up a lying bag and position it parallel to the front.</li>
+    </ul>
+
+    <p>
+      <span class="arli">ARLI</span> substantially outperforms synchronous DSRL, DSRL with RTC, and other asynchronous baselines,
+      achieving higher success rates and greater estimated throughput across all three tasks.
+    </p>
+
+    <div class="video-placeholder" style="margin-top: 1.5rem;">
+      <div>
+        <i class="fas fa-video"></i>
+        Real-world rollout videos can be added to <code>static/videos/</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop content has-text-justified">
+    <h2 class="title is-3 has-text-centered" id="ablations">Ablations</h2>
+
+    <p>
+      We ablate the components of <span class="arli">ARLI</span>, including intermediate actions, intermediate observations, RTC, and varying inference delays.
+      Additional figures from the paper are shown below; add PNG exports to <code>static/images/figures/</code> to populate them.
+    </p>
+
+    <details>
+      <summary><strong>State augmentation ablations (Figures 6&ndash;7, 9&ndash;10)</strong></summary>
+      <div class="figure-grid">
+        <figure>
+          <img src="./static/images/figures/AblationVariantsNoRtc.png"
+               data-placeholder="Figure 6 (AblationVariantsNoRtc.png)"
+               alt="Variants of ARLI without RTC.">
+          <figcaption class="figure-caption has-text-centered"><strong>Figure 6:</strong> Variants of <span class="arli">ARLI</span> (no RTC) with one component removed.</figcaption>
+        </figure>
+        <figure>
+          <img src="./static/images/figures/AblationVariantsRtc.png"
+               data-placeholder="Figure 7 (AblationVariantsRtc.png)"
+               alt="Variants of ARLI with RTC.">
+          <figcaption class="figure-caption has-text-centered"><strong>Figure 7:</strong> Comparison of <span class="arli">ARLI</span> and DSRL with RTC ablations.</figcaption>
+        </figure>
+        <figure>
+          <img src="./static/images/figures/AblationNoRtcSwimmer.png"
+               data-placeholder="Figure 9 (AblationNoRtcSwimmer.png)"
+               alt="ARLI variants without RTC on mjc swimmer.">
+          <figcaption class="figure-caption has-text-centered"><strong>Figure 9:</strong> Variants without RTC on <em>mjc swimmer</em>.</figcaption>
+        </figure>
+        <figure>
+          <img src="./static/images/figures/AblationRtcSwimmer.png"
+               data-placeholder="Figure 10 (AblationRtcSwimmer.png)"
+               alt="ARLI variants with RTC on mjc swimmer.">
+          <figcaption class="figure-caption has-text-centered"><strong>Figure 10:</strong> Variants with RTC on <em>mjc swimmer</em>.</figcaption>
+        </figure>
+      </div>
+    </details>
+
+    <details style="margin-top: 1rem;">
+      <summary><strong>Delay sensitivity and noise analysis (Figures 8, 11&ndash;12)</strong></summary>
+      <div class="figure-grid">
+        <figure>
+          <img src="./static/images/figures/DelaySensitivityNoRtc.png"
+               data-placeholder="Figure 8 (DelaySensitivityNoRtc.png)"
+               alt="ARLI performance at varying RL inference delays without RTC.">
+          <figcaption class="figure-caption has-text-centered"><strong>Figure 8:</strong> <span class="arli">ARLI</span> performance at varying RL inference delays.</figcaption>
+        </figure>
+        <figure>
+          <img src="./static/images/figures/DelaySensitivitySwimmer.png"
+               data-placeholder="Figure 11 (DelaySensitivitySwimmer.png)"
+               alt="ARLI performance at varying delays on mjc swimmer.">
+          <figcaption class="figure-caption has-text-centered"><strong>Figure 11:</strong> Delay sensitivity on <em>mjc swimmer</em> with and without RTC.</figcaption>
+        </figure>
+        <figure>
+          <img src="./static/images/figures/NoiseDistribution.png"
+               data-placeholder="Figure 12 (NoiseDistribution.png)"
+               alt="Checkpoint-wise evolution of the ARLI noise distribution.">
+          <figcaption class="figure-caption has-text-centered"><strong>Figure 12:</strong> Checkpoint-wise evolution of the <span class="arli">ARLI</span> noise distribution on held-out tasks.</figcaption>
+        </figure>
+      </div>
+    </details>
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{anonymous2026arli,
+  title     = {Learning to Act While Waiting: RL Finetuning of Generalist Robot Policies Under Inference Latency},
+  author    = {Anonymous},
+  booktitle = {Submitted to CoRL 2026},
+  year      = {2026},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Website borrowed from <a href="https://nerfies.github.io">NeRFies</a> under a
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International</a> License.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
