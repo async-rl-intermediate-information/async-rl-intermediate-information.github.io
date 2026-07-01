@@ -11,7 +11,7 @@ $(document).ready(function() {
     counterId: "#real-rollout-counter",
     prevId: "#real-prev",
     nextId: "#real-next",
-    basePath: "./static/videos/rollouts/",
+    basePath: "/static/videos/rollouts/",
     tasks: REAL_WORLD_TASKS
   });
   initImageCarousel({
@@ -19,7 +19,7 @@ $(document).ready(function() {
     counterId: "#overview-carousel-counter",
     prevId: "#overview-prev",
     nextId: "#overview-next",
-    basePath: "./static/images/figures/overview/",
+    basePath: "/static/images/figures/overview/",
     items: OVERVIEW_FIGURES,
     startIndex: OVERVIEW_FIGURES.length - 1
   });
@@ -28,8 +28,8 @@ $(document).ready(function() {
     counterId: "#figure5-carousel-counter",
     prevId: "#figure5-prev",
     nextId: "#figure5-next",
-    videoBasePath: "./static/videos/",
-    imageBasePath: "./static/images/figures/real_world/",
+    videoBasePath: "/static/videos/",
+    imageBasePath: "/static/images/figures/real_world/",
     tasks: FIGURE5_TASKS
   });
   initVideoAspectFromMetadata();

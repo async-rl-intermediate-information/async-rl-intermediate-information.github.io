@@ -13,16 +13,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap"
         rel="stylesheet">
 
-  <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="/static/css/bulma.min.css">
+  <link rel="stylesheet" href="/static/css/fontawesome.all.min.css">
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="./static/css/index.css">
-  <link rel="icon" href="./static/images/favicon.svg">
+  <link rel="stylesheet" href="/static/css/index.css">
+  <link rel="icon" href="/static/images/favicon.svg">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="./static/js/fontawesome.all.min.js"></script>
-  <script src="./static/js/index.js"></script>
+  <script defer src="/static/js/fontawesome.all.min.js"></script>
+  <script src="/static/js/index.js"></script>
 </head>
 <body>
 
@@ -55,7 +55,7 @@
           <div class="column has-text-centered">
             <div class="publication-links">
               <span class="link-block">
-                <a href="./static/paper.pdf" target="_blank" rel="noopener" class="external-link button is-normal is-rounded is-dark">
+                <a href="/static/paper.pdf" target="_blank" rel="noopener" class="external-link button is-normal is-rounded is-dark">
                   <span class="icon"><i class="fas fa-file-pdf"></i></span>
                   <span>Paper</span>
                 </a>
@@ -90,7 +90,7 @@
     <h2 class="title is-3 has-text-centered" id="arli">Asynchronous RL with Intermediate Information (<span class="arli">ARLI</span>)</h2>
 
     <img class="teaser-figure figure-full"
-         src="./static/images/figures/teaser_fig.png"
+         src="/static/images/figures/teaser_fig.png"
          alt="Enabling RL improvement of generalist robot policies under inference latency.">
     <p class="figure-caption has-text-centered">
       Enabling RL improvement of generalist robot policies under inference latency.
@@ -140,7 +140,7 @@
     <div class="columns is-vcentered">
       <div class="column is-half">
         <img class="figure-full"
-             src="./static/images/figures/intermediate_state_example.png"
+             src="/static/images/figures/intermediate_state_example.png"
              alt="The benefit of intermediate state conditioning under disturbances.">
       </div>
       <div class="column is-half">
@@ -171,7 +171,7 @@
     </p>
 
     <img class="figure-full"
-         src="./static/images/figures/sim_results.png"
+         src="/static/images/figures/sim_results.png"
          alt="Comparison of ARLI and DSRL on simulation tasks with and without RTC.">
     <p class="figure-caption has-text-centered">
       Comparison of <span class="arli">ARLI</span> and DSRL on simulation tasks with and without RTC.
@@ -252,21 +252,21 @@
 
     <p>
       We ablate the components of <span class="arli">ARLI</span>, including intermediate actions, intermediate observations, RTC, and varying inference delays.
-      Additional figures from the paper are shown below; add PNG exports to <code>static/images/figures/</code> to populate them.
+      Additional figures from the paper are shown below.
     </p>
 
     <details>
       <summary><strong>State augmentation ablations</strong></summary>
       <div class="figure-grid figure-grid-single">
         <figure>
-          <img src="./static/images/figures/arli_variants_rtc.png"
+          <img src="/static/images/figures/arli_variants_rtc.png"
                alt="Variants of ARLI with RTC ablations.">
           <figcaption class="figure-caption has-text-centered">Comparison of <span class="arli">ARLI</span> and DSRL with RTC ablations.</figcaption>
         </figure>
       </div>
       <div class="figure-grid figure-grid-single figure-grid-compact">
         <figure>
-          <img src="./static/images/figures/inference_delays.png"
+          <img src="/static/images/figures/inference_delays.png"
                alt="ARLI performance at varying RL inference delays.">
           <figcaption class="figure-caption has-text-centered"><span class="arli">ARLI</span> performance at varying RL inference delays.</figcaption>
         </figure>
@@ -277,14 +277,14 @@
       <summary><strong>Delay sensitivity and noise analysis</strong></summary>
       <div class="figure-grid figure-grid-single">
         <figure>
-          <img src="./static/images/figures/delay_sensitivity.png"
+          <img src="/static/images/figures/delay_sensitivity.png"
                alt="Delay sensitivity on mjc swimmer with and without RTC.">
           <figcaption class="figure-caption has-text-centered">Delay sensitivity on <em>mjc swimmer</em> with and without RTC.</figcaption>
         </figure>
       </div>
       <div class="figure-grid figure-grid-single">
         <figure>
-          <img src="./static/images/figures/noise_distribution_analysis.png"
+          <img src="/static/images/figures/noise_distribution_analysis.png"
                alt="Checkpoint-wise evolution of the ARLI noise distribution.">
           <figcaption class="figure-caption has-text-centered">Checkpoint-wise evolution of the <span class="arli">ARLI</span> noise distribution on held-out tasks.</figcaption>
         </figure>
@@ -299,7 +299,7 @@
     <h2 class="title is-3 has-text-centered" id="presentation">CoRL Presentation</h2>
     <div class="video-wrapper presentation-video-wrapper">
       <video class="overview-video" controls playsinline preload="metadata"
-             src="./static/videos/corl_presentation_final_final_1080p.mp4">
+             src="/static/videos/corl_presentation_final_final_1080p.mp4">
       </video>
     </div>
   </div>
