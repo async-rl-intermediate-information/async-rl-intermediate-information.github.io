@@ -31,6 +31,7 @@
   <a class="toc-item" href="#simulation"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">Simulation</span></a>
   <a class="toc-item" href="#real-world"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">Real-World</span></a>
   <a class="toc-item" href="#ablations"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">Ablations</span></a>
+  <a class="toc-item" href="#presentation"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">Presentation</span></a>
 </nav>
 
 
@@ -89,11 +90,10 @@
     <h2 class="title is-3 has-text-centered" id="arli">Asynchronous RL with Intermediate Information (<span class="arli">ARLI</span>)</h2>
 
     <img class="teaser-figure figure-full"
-         src="./static/images/figures/Teaser.png"
-         data-placeholder="Figure 1: Teaser (Teaser.png)"
+         src="./static/images/figures/teaser_fig.png"
          alt="Enabling RL improvement of generalist robot policies under inference latency.">
     <p class="figure-caption has-text-centered">
-      <strong>Figure 1:</strong> Enabling RL improvement of generalist robot policies under inference latency.
+      Enabling RL improvement of generalist robot policies under inference latency.
       Generalist policies incur significant action inference latency delays, either forcing pauses during inference or relying on stale observations, making RL improvement brittle.
       <span class="arli">ARLI</span> uses intermediate actions and updated asynchronous observations to steer the next action chunk, enabling effective real-world improvement under asynchronous inference.
     </p>
@@ -112,15 +112,23 @@
       Under asynchronous inference, naive DSRL conditioning on only the delayed initial state is insufficient for effective finetuning.
     </p>
 
-    <img class="figure-full"
-         src="./static/images/figures/Overview.png"
-         data-placeholder="Figure 2: ARLI overview (Overview.png)"
-         alt="An overview of the ARLI approach under inference delays.">
+    <div class="sim-carousel figure-carousel">
+      <div class="sim-carousel-stage">
+        <button type="button" class="sim-carousel-arrow sim-carousel-prev" id="overview-prev" aria-label="Previous variant">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="sim-carousel-viewport">
+          <div class="sim-carousel-track" id="overview-carousel-track"></div>
+        </div>
+        <button type="button" class="sim-carousel-arrow sim-carousel-next" id="overview-next" aria-label="Next variant">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <div id="overview-carousel-counter" class="sim-carousel-dots"></div>
+    </div>
     <p class="figure-caption has-text-centered">
-      <strong>Figure 2:</strong> An overview of <span class="arli">ARLI</span>.
-      Inference begins <em>t</em><sub>delay</sub> steps before the next action chunk is required.
-      At step <em>t</em> &minus; <em>t</em><sub>rl</sub><sup>delay</sup>, the RL policy must run so the action expert receives a noise input once VLM inference finishes.
-      The RL policy is conditioned on the initial state, intermediate actions, and an intermediate observation.
+      An overview of asynchronous inference and RL finetuning under inference delays.
+      Use the arrows or dots to compare naive asynchronous inference, DSRL baselines, and <span class="arli">ARLI</span>.
     </p>
 
     <p>Our two core contributions restore near-Markovian structure within the inference window:</p>
@@ -132,13 +140,12 @@
     <div class="columns is-vcentered">
       <div class="column is-half">
         <img class="figure-full"
-             src="./static/images/figures/IntermediateState.png"
-             data-placeholder="Figure 3: Intermediate state (IntermediateState.png)"
+             src="./static/images/figures/intermediate_state_example.png"
              alt="The benefit of intermediate state conditioning under disturbances.">
       </div>
       <div class="column is-half">
         <p class="figure-caption">
-          <strong>Figure 3:</strong> The benefit of intermediate state conditioning.
+          The benefit of intermediate state conditioning.
           In naive asynchronous inference, the initial state does not capture stochastic events (e.g., moving obstacles).
           By conditioning on an intermediate state, the policy can react to disturbances that occur after inference begins.
         </p>
@@ -164,11 +171,10 @@
     </p>
 
     <img class="figure-full"
-         src="./static/images/figures/SimResults.png"
-         data-placeholder="Figure 4: Simulation results (SimResults.png)"
+         src="./static/images/figures/sim_results.png"
          alt="Comparison of ARLI and DSRL on simulation tasks with and without RTC.">
     <p class="figure-caption has-text-centered">
-      <strong>Figure 4:</strong> Comparison of <span class="arli">ARLI</span> and DSRL on simulation tasks with and without RTC.
+      Comparison of <span class="arli">ARLI</span> and DSRL on simulation tasks with and without RTC.
     </p>
 
     <p>
@@ -189,13 +195,23 @@
       All experiments initialize from &pi;<sub>0.5</sub> finetuned on small human demonstration datasets at 60 Hz with action chunk length 50.
     </p>
 
-    <img class="figure-full"
-         src="./static/images/figures/RealWorldResults.png"
-         data-placeholder="Figure 5: Real-world results (RealWorldResults.png)"
-         alt="Comparison of ARLI against other RL finetuning methods on real-world tasks.">
+    <div class="sim-carousel task-media-carousel">
+      <div class="sim-carousel-stage">
+        <button type="button" class="sim-carousel-arrow sim-carousel-prev" id="figure5-prev" aria-label="Previous task">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="sim-carousel-viewport">
+          <div class="sim-carousel-track" id="figure5-carousel-track"></div>
+        </div>
+        <button type="button" class="sim-carousel-arrow sim-carousel-next" id="figure5-next" aria-label="Next task">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <div id="figure5-carousel-counter" class="sim-carousel-dots"></div>
+    </div>
     <p class="figure-caption has-text-centered">
-      <strong>Figure 5:</strong> Comparison of <span class="arli">ARLI</span> against other RL finetuning methods on real-world tasks.
-      Left: task images. Middle: training success curves. Right: estimated throughput in successes/hour.
+      Comparison of <span class="arli">ARLI</span> against other RL finetuning methods on real-world tasks.
+      Each task shows a rollout video (top) and training curves with estimated throughput (bottom).
     </p>
 
     <p>We consider three real-world manipulation tasks:</p>
@@ -210,12 +226,22 @@
       achieving higher success rates and greater estimated throughput across all three tasks.
     </p>
 
-    <div class="video-placeholder" style="margin-top: 1.5rem;">
-      <div>
-        <i class="fas fa-video"></i>
-        Real-world rollout videos can be added to <code>static/videos/</code>
+    <h3 class="title is-4 has-text-centered" style="margin-top: 1.5rem;">Real-World Rollout Videos</h3>
+    <div class="sim-carousel">
+      <div class="sim-carousel-stage">
+        <button type="button" class="sim-carousel-arrow sim-carousel-prev" id="real-prev" aria-label="Previous task">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="sim-carousel-viewport">
+          <div class="sim-carousel-track" id="real-carousel-track"></div>
+        </div>
+        <button type="button" class="sim-carousel-arrow sim-carousel-next" id="real-next" aria-label="Next task">
+          <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
+      <div id="real-rollout-counter" class="sim-carousel-dots"></div>
     </div>
+    <p class="sim-carousel-cap"><span class="arli">ARLI</span> finetuning rollouts on real-world manipulation tasks.</p>
   </div>
 </section>
 
@@ -230,58 +256,52 @@
     </p>
 
     <details>
-      <summary><strong>State augmentation ablations (Figures 6&ndash;7, 9&ndash;10)</strong></summary>
-      <div class="figure-grid">
+      <summary><strong>State augmentation ablations</strong></summary>
+      <div class="figure-grid figure-grid-single">
         <figure>
-          <img src="./static/images/figures/AblationVariantsNoRtc.png"
-               data-placeholder="Figure 6 (AblationVariantsNoRtc.png)"
-               alt="Variants of ARLI without RTC.">
-          <figcaption class="figure-caption has-text-centered"><strong>Figure 6:</strong> Variants of <span class="arli">ARLI</span> (no RTC) with one component removed.</figcaption>
+          <img src="./static/images/figures/arli_variants_rtc.png"
+               alt="Variants of ARLI with RTC ablations.">
+          <figcaption class="figure-caption has-text-centered">Comparison of <span class="arli">ARLI</span> and DSRL with RTC ablations.</figcaption>
         </figure>
+      </div>
+      <div class="figure-grid figure-grid-single figure-grid-compact">
         <figure>
-          <img src="./static/images/figures/AblationVariantsRtc.png"
-               data-placeholder="Figure 7 (AblationVariantsRtc.png)"
-               alt="Variants of ARLI with RTC.">
-          <figcaption class="figure-caption has-text-centered"><strong>Figure 7:</strong> Comparison of <span class="arli">ARLI</span> and DSRL with RTC ablations.</figcaption>
-        </figure>
-        <figure>
-          <img src="./static/images/figures/AblationNoRtcSwimmer.png"
-               data-placeholder="Figure 9 (AblationNoRtcSwimmer.png)"
-               alt="ARLI variants without RTC on mjc swimmer.">
-          <figcaption class="figure-caption has-text-centered"><strong>Figure 9:</strong> Variants without RTC on <em>mjc swimmer</em>.</figcaption>
-        </figure>
-        <figure>
-          <img src="./static/images/figures/AblationRtcSwimmer.png"
-               data-placeholder="Figure 10 (AblationRtcSwimmer.png)"
-               alt="ARLI variants with RTC on mjc swimmer.">
-          <figcaption class="figure-caption has-text-centered"><strong>Figure 10:</strong> Variants with RTC on <em>mjc swimmer</em>.</figcaption>
+          <img src="./static/images/figures/inference_delays.png"
+               alt="ARLI performance at varying RL inference delays.">
+          <figcaption class="figure-caption has-text-centered"><span class="arli">ARLI</span> performance at varying RL inference delays.</figcaption>
         </figure>
       </div>
     </details>
 
     <details style="margin-top: 1rem;">
-      <summary><strong>Delay sensitivity and noise analysis (Figures 8, 11&ndash;12)</strong></summary>
-      <div class="figure-grid">
+      <summary><strong>Delay sensitivity and noise analysis</strong></summary>
+      <div class="figure-grid figure-grid-single">
         <figure>
-          <img src="./static/images/figures/DelaySensitivityNoRtc.png"
-               data-placeholder="Figure 8 (DelaySensitivityNoRtc.png)"
-               alt="ARLI performance at varying RL inference delays without RTC.">
-          <figcaption class="figure-caption has-text-centered"><strong>Figure 8:</strong> <span class="arli">ARLI</span> performance at varying RL inference delays.</figcaption>
+          <img src="./static/images/figures/delay_sensitivity.png"
+               alt="Delay sensitivity on mjc swimmer with and without RTC.">
+          <figcaption class="figure-caption has-text-centered">Delay sensitivity on <em>mjc swimmer</em> with and without RTC.</figcaption>
         </figure>
+      </div>
+      <div class="figure-grid figure-grid-single">
         <figure>
-          <img src="./static/images/figures/DelaySensitivitySwimmer.png"
-               data-placeholder="Figure 11 (DelaySensitivitySwimmer.png)"
-               alt="ARLI performance at varying delays on mjc swimmer.">
-          <figcaption class="figure-caption has-text-centered"><strong>Figure 11:</strong> Delay sensitivity on <em>mjc swimmer</em> with and without RTC.</figcaption>
-        </figure>
-        <figure>
-          <img src="./static/images/figures/NoiseDistribution.png"
-               data-placeholder="Figure 12 (NoiseDistribution.png)"
+          <img src="./static/images/figures/noise_distribution_analysis.png"
                alt="Checkpoint-wise evolution of the ARLI noise distribution.">
-          <figcaption class="figure-caption has-text-centered"><strong>Figure 12:</strong> Checkpoint-wise evolution of the <span class="arli">ARLI</span> noise distribution on held-out tasks.</figcaption>
+          <figcaption class="figure-caption has-text-centered">Checkpoint-wise evolution of the <span class="arli">ARLI</span> noise distribution on held-out tasks.</figcaption>
         </figure>
       </div>
     </details>
+  </div>
+</section>
+
+
+<section class="section is-light">
+  <div class="container is-max-desktop content has-text-justified">
+    <h2 class="title is-3 has-text-centered" id="presentation">CoRL Presentation</h2>
+    <div class="video-wrapper presentation-video-wrapper">
+      <video class="overview-video" controls playsinline preload="metadata"
+             src="./static/videos/corl_presentation_final_final_1080p.mp4">
+      </video>
+    </div>
   </div>
 </section>
 
