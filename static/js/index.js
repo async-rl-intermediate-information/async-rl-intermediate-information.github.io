@@ -63,66 +63,6 @@ function hideControlsOnEnd(v) {
   });
 }
 
-function isSafari() {
-  var ua = navigator.userAgent;
-  return /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox/i.test(ua);
-}
-
-function prepareCarouselVideo(video, src) {
-  video.muted = true;
-  video.defaultMuted = true;
-  video.setAttribute("muted", "");
-  video.setAttribute("playsinline", "");
-  video.setAttribute("webkit-playsinline", "");
-  video.preload = "none";
-  video.controls = true;
-  video.dataset.src = src;
-}
-
-function activateCarouselVideo(video) {
-  if (!video || !video.dataset.src) {
-    return;
-  }
-  if (video.dataset.loadedSrc !== video.dataset.src) {
-    video.src = video.dataset.src;
-    video.dataset.loadedSrc = video.dataset.src;
-    video.load();
-  }
-  video.muted = true;
-  var playWhenReady = function() {
-    video.removeEventListener("loadeddata", playWhenReady);
-    video.removeEventListener("canplay", playWhenReady);
-    var p = video.play();
-    if (p && p.catch) {
-      p.catch(function() {});
-    }
-  };
-  if (video.readyState >= 2) {
-    playWhenReady();
-  } else {
-    video.addEventListener("loadeddata", playWhenReady);
-    video.addEventListener("canplay", playWhenReady);
-  }
-}
-
-function deactivateCarouselVideo(video) {
-  if (!video) {
-    return;
-  }
-  video.pause();
-  video.removeAttribute("src");
-  delete video.dataset.loadedSrc;
-  try {
-    video.load();
-  } catch (e) {}
-}
-
-function bindCarouselVideoControls(video) {
-  if (!isSafari()) {
-    hideControlsOnEnd(video);
-  }
-}
-
 function capitalizeLabel(label) {
   if (!label) {
     return "";
@@ -160,13 +100,13 @@ function initVideoCarousel(opts) {
     var $card = $(
       '<div class="sim-carousel-card">' +
         '<div class="video-aspect sim-video-aspect">' +
-          '<video controls muted playsinline webkit-playsinline preload="none"></video>' +
+          '<video controls playsinline preload="metadata"></video>' +
         '</div>' +
         '<p class="figure-caption video-card-caption has-text-centered"></p>' +
       '</div>'
     );
     var video = $card.find("video")[0];
-    prepareCarouselVideo(video, basePath + task.file);
+    video.src = basePath + task.file;
     $card.find("p").text(task.label);
     video.addEventListener("loadedmetadata", function() {
       applySharedAspect(video.videoWidth, video.videoHeight);
@@ -174,7 +114,7 @@ function initVideoCarousel(opts) {
     video.addEventListener("ended", function() {
       if ($card.hasClass("is-active")) { step(1); }
     });
-    bindCarouselVideoControls(video);
+    hideControlsOnEnd(video);
     return $card;
   }
 
@@ -223,21 +163,25 @@ function initVideoCarousel(opts) {
 
   function playActive() {
     $cards.each(function() {
-      var video = $(this).find("video")[0];
-      if ($(this).hasClass("is-active")) {
-        activateCarouselVideo(video);
-      } else {
-        deactivateCarouselVideo(video);
-      }
+      var active = $(this).hasClass("is-active");
+      $(this).find("video").each(function() {
+        if (active) {
+          this.muted = true;
+          var p = this.play();
+          if (p && p.catch) { p.catch(function() {}); }
+        } else {
+          this.pause();
+        }
+      });
     });
   }
 
   function step(delta) {
     if (animating) { return; }
     animating = true;
-    $cards.find("video").each(function() { deactivateCarouselVideo(this); });
     pos += delta;
     position(true);
+    playActive();
   }
 
   function goTo(target) {
@@ -245,9 +189,9 @@ function initVideoCarousel(opts) {
     var logical = ((pos - CLONES) % n + n) % n;
     if (target === logical) { return; }
     animating = true;
-    $cards.find("video").each(function() { deactivateCarouselVideo(this); });
     pos = CLONES + target;
     position(true);
+    playActive();
   }
 
   $track.on("transitionend", function(e) {
@@ -256,11 +200,12 @@ function initVideoCarousel(opts) {
     if (pos >= n + CLONES) {
       pos -= n;
       position(false);
+      playActive();
     } else if (pos < CLONES) {
       pos += n;
       position(false);
+      playActive();
     }
-    playActive();
   });
 
   $prev.on("click", function() { step(-1); });
@@ -306,7 +251,7 @@ function initTaskMediaCarousel(opts) {
     var $card = $(
       '<div class="sim-carousel-card task-media-card">' +
         '<div class="video-aspect sim-video-aspect task-media-video">' +
-          '<video controls muted playsinline webkit-playsinline preload="none"></video>' +
+          '<video controls playsinline preload="metadata"></video>' +
         '</div>' +
         '<div class="task-result-aspect">' +
           '<img alt="">' +
@@ -316,7 +261,7 @@ function initTaskMediaCarousel(opts) {
     );
     var video = $card.find("video")[0];
     var img = $card.find("img")[0];
-    prepareCarouselVideo(video, videoBasePath + task.video);
+    video.src = videoBasePath + task.video;
     img.src = imageBasePath + task.image;
     img.alt = task.label + " results";
     $card.find("p").text(task.label);
@@ -331,7 +276,7 @@ function initTaskMediaCarousel(opts) {
     video.addEventListener("ended", function() {
       if ($card.hasClass("is-active")) { step(1); }
     });
-    bindCarouselVideoControls(video);
+    hideControlsOnEnd(video);
     return $card;
   }
 
@@ -386,21 +331,25 @@ function initTaskMediaCarousel(opts) {
 
   function playActive() {
     $cards.each(function() {
-      var video = $(this).find("video")[0];
-      if ($(this).hasClass("is-active")) {
-        activateCarouselVideo(video);
-      } else {
-        deactivateCarouselVideo(video);
-      }
+      var active = $(this).hasClass("is-active");
+      $(this).find("video").each(function() {
+        if (active) {
+          this.muted = true;
+          var p = this.play();
+          if (p && p.catch) { p.catch(function() {}); }
+        } else {
+          this.pause();
+        }
+      });
     });
   }
 
   function step(delta) {
     if (animating) { return; }
     animating = true;
-    $cards.find("video").each(function() { deactivateCarouselVideo(this); });
     pos += delta;
     position(true);
+    playActive();
   }
 
   function goTo(target) {
@@ -408,9 +357,9 @@ function initTaskMediaCarousel(opts) {
     var logical = ((pos - CLONES) % n + n) % n;
     if (target === logical) { return; }
     animating = true;
-    $cards.find("video").each(function() { deactivateCarouselVideo(this); });
     pos = CLONES + target;
     position(true);
+    playActive();
   }
 
   $track.on("transitionend", function(e) {
@@ -419,11 +368,12 @@ function initTaskMediaCarousel(opts) {
     if (pos >= n + CLONES) {
       pos -= n;
       position(false);
+      playActive();
     } else if (pos < CLONES) {
       pos += n;
       position(false);
+      playActive();
     }
-    playActive();
   });
 
   $prev.on("click", function() { step(-1); });
