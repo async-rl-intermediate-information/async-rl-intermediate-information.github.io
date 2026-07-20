@@ -67,7 +67,7 @@ This website template is borrowed from [NeRFies](https://nerfies.github.io) unde
 ```bibtex
 @inproceedings{anonymous2026arli,
   title     = {Learning to Act While Waiting: RL Finetuning of Generalist Robot Policies Under Inference Latency},
-  author    = {Anonymous},
+  author    = {Zhu, Brian and Khalil, Momen and Harrison, E. H. and Poggi, Emanuele and Schmitt, Philipp Sebastian and Kast, Bernd and Meister, Philine and Atreya, Pranav and Li, Qiyang and Ferchau, Finn and Colmenero, Cesar and Shahapurkar, Yash and Narayanan, Gokul and Erdogan, Melih and Mees, Oier and Wurm, Kai M. and von Wichert, Georg and Solowjow, Eugen and Wagenmaker, Andrew and Levine, Sergey},
   booktitle = {Submitted to CoRL 2026},
   year      = {2026},
 }

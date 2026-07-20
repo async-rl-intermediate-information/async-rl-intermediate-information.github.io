@@ -28,17 +28,19 @@ $(document).ready(function() {
     counterId: "#figure5-carousel-counter",
     prevId: "#figure5-prev",
     nextId: "#figure5-next",
-    videoBasePath: "/static/videos/",
+    videoBasePath: "/static/videos/examples/",
     imageBasePath: "/static/images/figures/real_world/",
+    legendImage: "real_world_legend.png",
+    titlesImage: "real_world_titles.png",
     tasks: FIGURE5_TASKS
   });
   initVideoAspectFromMetadata();
 });
 
 var FIGURE5_TASKS = [
-  { video: "power_connector_good_rtc.mp4", image: "real_world_assembly.png", label: "Assembly" },
-  { video: "shoe_in_bag_rtc_good.mp4", image: "real_world_shoe_in_bag.png", label: "Shoe-in-Bag" },
-  { video: "bag_placement_good.mp4", image: "real_world_bag_placement.png", label: "Bag-Placement" }
+  { success: "power_conn_good.mp4", failure: "power_conn_bad.mp4", image: "real_world_assembly.png", label: "Assembly" },
+  { success: "shoe_in_bag_good.mp4", failure: "shoe_in_bag_bad.mp4", image: "real_world_shoe_in_bag.png", label: "Shoe-in-Bag" },
+  { success: "bag_placing_good.mp4", failure: "bag_placing_bad.mp4", image: "real_world_bag_placement.png", label: "Bag-Placement" }
 ];
 
 var OVERVIEW_FIGURES = [
@@ -231,7 +233,8 @@ function initTaskMediaCarousel(opts) {
 
   var tasks = opts.tasks.map(function(entry) {
     return {
-      video: entry.video,
+      success: entry.success,
+      failure: entry.failure,
       image: entry.image,
       label: capitalizeLabel(entry.label)
     };
@@ -244,39 +247,61 @@ function initTaskMediaCarousel(opts) {
   var $viewport = $track.closest(".sim-carousel").find(".sim-carousel-viewport");
   var videoBasePath = opts.videoBasePath;
   var imageBasePath = opts.imageBasePath;
+  var legendImage = opts.legendImage;
+  var titlesImage = opts.titlesImage;
   var n = tasks.length;
   var CLONES = 2;
 
   function makeCard(task) {
     var $card = $(
       '<div class="sim-carousel-card task-media-card">' +
-        '<div class="video-aspect sim-video-aspect task-media-video">' +
-          '<video controls playsinline preload="metadata"></video>' +
+        '<div class="rollout-variants task-example-videos">' +
+          '<div class="rollout-cell">' +
+            '<div class="video-aspect ar169 task-media-video">' +
+              '<video controls playsinline preload="metadata"></video>' +
+            '</div>' +
+            '<p class="method-label">Success</p>' +
+          '</div>' +
+          '<div class="rollout-cell">' +
+            '<div class="video-aspect ar169 task-media-video">' +
+              '<video controls playsinline preload="metadata"></video>' +
+            '</div>' +
+            '<p class="method-label">Failure</p>' +
+          '</div>' +
         '</div>' +
-        '<div class="task-result-aspect">' +
-          '<img alt="">' +
+        '<div class="task-results-block">' +
+          '<img class="task-legend-img" alt="Legend">' +
+          '<img class="task-titles-img" alt="Column titles">' +
+          '<img class="task-plot-img" alt="">' +
         '</div>' +
         '<p class="figure-caption video-card-caption has-text-centered"></p>' +
       '</div>'
     );
-    var video = $card.find("video")[0];
-    var img = $card.find("img")[0];
-    video.src = videoBasePath + task.video;
-    img.src = imageBasePath + task.image;
-    img.alt = task.label + " results";
-    $card.find("p").text(task.label);
-    video.addEventListener("loadedmetadata", function() {
-      applyVideoAspect(video.videoWidth, video.videoHeight);
+    var videos = $card.find("video");
+    var legendImg = $card.find(".task-legend-img")[0];
+    var titlesImg = $card.find(".task-titles-img")[0];
+    var plotImg = $card.find(".task-plot-img")[0];
+    videos[0].src = videoBasePath + task.success;
+    videos[1].src = videoBasePath + task.failure;
+    legendImg.src = imageBasePath + legendImage;
+    titlesImg.src = imageBasePath + titlesImage;
+    plotImg.src = imageBasePath + task.image;
+    plotImg.alt = task.label + " results";
+    $card.find(".video-card-caption").text(task.label);
+    $card.find("video").each(function() {
+      var video = this;
+      video.addEventListener("loadedmetadata", function() {
+        applyVideoAspect(video.videoWidth, video.videoHeight);
+        position(false);
+      });
+      hideControlsOnEnd(video);
+    });
+    function onResultImageLoad() {
       position(false);
-    });
-    img.addEventListener("load", function() {
-      applyImageAspect(img.naturalWidth, img.naturalHeight);
-      position(false);
-    });
-    video.addEventListener("ended", function() {
-      if ($card.hasClass("is-active")) { step(1); }
-    });
-    hideControlsOnEnd(video);
+    }
+    legendImg.addEventListener("load", onResultImageLoad);
+    titlesImg.addEventListener("load", onResultImageLoad);
+    plotImg.addEventListener("load", onResultImageLoad);
     return $card;
   }
 
@@ -285,13 +310,6 @@ function initTaskMediaCarousel(opts) {
     if (videoAspectSet || !w || !h) { return; }
     videoAspectSet = true;
     $track.find(".task-media-video").css("aspect-ratio", w + " / " + h);
-  }
-
-  var imageAspectSet = false;
-  function applyImageAspect(w, h) {
-    if (imageAspectSet || !w || !h) { return; }
-    imageAspectSet = true;
-    $track.find(".task-result-aspect").css("aspect-ratio", w + " / " + h);
   }
 
   var order = [];
