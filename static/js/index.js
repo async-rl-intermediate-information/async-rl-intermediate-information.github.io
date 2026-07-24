@@ -35,6 +35,7 @@ $(document).ready(function() {
     tasks: FIGURE5_TASKS
   });
   initVideoAspectFromMetadata();
+  initPresentationVideo();
 });
 
 var FIGURE5_TASKS = [
@@ -567,6 +568,37 @@ function setAspectFromVideo(videoEl, wrapperEl) {
     return;
   }
   wrapperEl.style.aspectRatio = videoEl.videoWidth + " / " + videoEl.videoHeight;
+}
+
+function initPresentationVideo() {
+  var video = document.querySelector(".presentation-video-wrapper video");
+  if (!video) {
+    return;
+  }
+
+  var muteUntil = 2;
+  var muteLockReleased = false;
+
+  function enforceMuteWindow() {
+    if (video.currentTime < muteUntil) {
+      muteLockReleased = false;
+      video.muted = true;
+      return;
+    }
+    if (!muteLockReleased) {
+      muteLockReleased = true;
+      video.muted = false;
+    }
+  }
+
+  video.addEventListener("play", enforceMuteWindow);
+  video.addEventListener("timeupdate", enforceMuteWindow);
+  video.addEventListener("seeked", enforceMuteWindow);
+  video.addEventListener("volumechange", function() {
+    if (video.currentTime < muteUntil && !video.muted) {
+      video.muted = true;
+    }
+  });
 }
 
 function initVideoAspectFromMetadata() {
